@@ -46,11 +46,6 @@ function downloadAudio() {
     const rate = parseFloat(document.getElementById("rate").value);
     const voiceSelect = document.getElementById("voice");
     const selectedVoiceIndex = voiceSelect.options[voiceSelect.selectedIndex].value;
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = pitch;
-    utterance.rate = rate;
-    utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
     
     // Wait for the audio to be ready
     utterance.onend = function () {
