@@ -53,10 +53,13 @@ function downloadAudio() {
     utterance.rate = rate;
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
 
+    // Synthesize the speech
+    speechSynthesis.speak(utterance);
+
     // Wait for the audio to be ready
     utterance.onend = function () {
         // Create a Blob directly from the audio data
-        const blob = new Blob([utterance.audioData], { type: 'audio/wav' });
+        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: 'audio/mpeg' });
 
         // Create a URL for the Blob
         const url = URL.createObjectURL(blob);
@@ -64,11 +67,12 @@ function downloadAudio() {
         // Set the download link's attributes and trigger the download
         const downloadLink = document.getElementById("downloadLink");
         downloadLink.href = url;
-        downloadLink.download = "speech.wav";
+        downloadLink.download = "speech.mp3";
         downloadLink.style.display = "none"; // Hide the link
         downloadLink.click(); // Trigger the download
     };
 }
+
 
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
