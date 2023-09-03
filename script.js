@@ -5,7 +5,6 @@ const downloadButton = document.getElementById("download");
 const pitchInput = document.getElementById("pitch");
 const rateInput = document.getElementById("rate");
 const audioElement = document.getElementById("audio");
-let audioChunks = [];
 
 // Define a list of available voices
 const availableVoices = [
@@ -73,5 +72,6 @@ function downloadAudio() {
         downloadLink.click(); // Trigger the download
     };
 }
+
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
