@@ -15,7 +15,7 @@ app.post("/tts", (req, res) => {
 
     // Use node-gtts to generate audio and send it as a response
     const gttsStream = gtts(text, "en");
-    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Type", "audio/wav");
     gttsStream.pipe(res);
 });
 
