@@ -40,18 +40,7 @@ function speakText() {
     speechSynthesis.speak(utterance);
 }
 
-// Modify the downloadAudio function
-let isGeneratingAudio = false;
-
-// Modify the downloadAudio function
 function downloadAudio() {
-    // Check if audio is already being generated
-    if (isGeneratingAudio) {
-        return;
-    }
-    
-    isGeneratingAudio = true;
-
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
     const rate = parseFloat(document.getElementById("rate").value);
@@ -62,30 +51,21 @@ function downloadAudio() {
     utterance.pitch = pitch;
     utterance.rate = rate;
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
-
-    // Prevent the speech from playing
-    utterance.volume = 0;
-
-    // Synthesize the speech
+    
+    // Synthesize the speech and create a Blob with the audio
     speechSynthesis.speak(utterance);
-
+    
     // Wait for the audio to be ready
     utterance.onend = function () {
-        // Create a Blob directly from the audio data
-        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: 'audio/mpeg' });
-
-        // Create a URL for the Blob
+        const blob = new Blob([new XMLSerializer().serializeToString(utterance)]);
         const url = URL.createObjectURL(blob);
-
+        
         // Set the download link's attributes and trigger the download
         const downloadLink = document.getElementById("downloadLink");
         downloadLink.href = url;
         downloadLink.download = "speech.mp3";
         downloadLink.style.display = "none"; // Hide the link
         downloadLink.click(); // Trigger the download
-
-        // Reset the flag
-        isGeneratingAudio = false;
     };
 }
 
