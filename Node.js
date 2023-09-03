@@ -12,14 +12,11 @@ app.post("/tts", (req, res) => {
     const text = req.body.text;
     const pitch = req.body.pitch || 1;
     const rate = req.body.rate || 1;
-    const gttsStream = gtts(text, "en");
-    gttsStream.pipe(res);
 
-    // Optionally, you can save the speech to a file
-    const outputFile = "output.mp3";
-    gtts(text, "en", pitch, rate).save(outputFile, () => {
-        console.log(`Speech saved to ${outputFile}`);
-    });
+    // Use node-gtts to generate audio and send it as a response
+    const gttsStream = gtts(text, "en");
+    res.setHeader("Content-Type", "audio/mpeg");
+    gttsStream.pipe(res);
 });
 
 app.listen(port, () => {
