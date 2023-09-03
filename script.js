@@ -39,65 +39,17 @@ function speakText() {
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
     speechSynthesis.speak(utterance);
 }
-
-function initializeVoices() {
-    const voices = speechSynthesis.getVoices();
-    const voiceSelect = document.getElementById("voice");
-    voiceSelect.innerHTML = "";
-    voices.forEach((voice, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.textContent = voice.name;
-        voiceSelect.appendChild(option);
-    });
-}
-
-// Initialize voices when the page loads
-window.addEventListener("load", () => {
-    initializeVoices();
-});
-
+// Function to download the speech as an audio file
 function downloadAudio() {
-    const text = document.getElementById("text").value;
-    const pitch = parseFloat(document.getElementById("pitch").value);
-    const rate = parseFloat(document.getElementById("rate").value);
-    const voiceSelect = document.getElementById("voice");
-    const selectedVoiceIndex = voiceSelect.options[voiceSelect.selectedIndex].value;
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = pitch;
-    utterance.rate = rate;
-    utterance.voice = speechSynthesis.getVoices()[selectedVoiceIndex];
-
-    // Prevent the speech from playing
-    utterance.volume = 0;
-
-    // Synthesize the speech
-    speechSynthesis.speak(utterance);
-
-    // Wait for the audio to be ready
-    utterance.onend = function () {
-        // Set the download link's href to the audio data URL
-        const audioBlob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: "audio/mpeg" });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = audioUrl;
-        downloadLink.download = "speech.mp3";
-        downloadLink.style.display = "block"; // Show the link
-    };
+    const utterance = new SpeechSynthesisUtterance(textInput.value);
+    utterance.pitch = parseFloat(pitchInput.value);
+    utterance.rate = parseFloat(rateInput.value);
+    const blob = new Blob([new XMLSerializer().serializeToString(utterance)]);
+    const url = URL.createObjectURL(blob);
+    audioElement.src = url;
+    audioElement.download = "speech.mp3";
+    audioElement.style.display = "block";
 }
-
-// ... (previous code)
-
-// Event listener for the speak button
-document.getElementById("speak").addEventListener("click", () => {
-    // Ensure the download link is hidden
-    const downloadLink = document.getElementById("downloadLink");
-    downloadLink.style.display = "none";
-
-    // Generate and download the audio
-    downloadAudio();
-});
 
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
