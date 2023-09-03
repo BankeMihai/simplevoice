@@ -52,9 +52,6 @@ function downloadAudio() {
     utterance.rate = rate;
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
     
-    // Synthesize the speech and create a Blob with the audio
-    speechSynthesis.speak(utterance);
-    
     // Wait for the audio to be ready
     utterance.onend = function () {
         const blob = new Blob([new XMLSerializer().serializeToString(utterance)]);
