@@ -40,6 +40,7 @@ function speakText() {
     speechSynthesis.speak(utterance);
 }
 
+// Modify the downloadAudio function
 function downloadAudio() {
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
@@ -57,16 +58,8 @@ function downloadAudio() {
 
     // Wait for the audio to be ready
     utterance.onend = function () {
-        // Create an audio element to play the audio
-        const audioElement = document.createElement("audio");
-        audioElement.controls = true;
-        audioElement.src = URL.createObjectURL(utterance.audioBuffer);
-        
-        // Append the audio element to the document
-        document.body.appendChild(audioElement);
-        
-        // Create a Blob from the audio data
-        const blob = new Blob([utterance.audioBuffer], { type: 'audio/mpeg' });
+        // Create a Blob directly from the audio data
+        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: 'audio/mpeg' });
 
         // Create a URL for the Blob
         const url = URL.createObjectURL(blob);
