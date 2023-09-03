@@ -57,7 +57,6 @@ window.addEventListener("load", () => {
     initializeVoices();
 });
 
-// Function to generate and download audio
 function downloadAudio() {
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
@@ -78,22 +77,17 @@ function downloadAudio() {
 
     // Wait for the audio to be ready
     utterance.onend = function () {
-        // Create a Blob directly from the audio data
-        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: "audio/mpeg" });
-
-        // Create a URL for the Blob
-        const url = URL.createObjectURL(blob);
-
-        // Set the download link's attributes and trigger the download
+        // Set the download link's href to the audio data URL
+        const audioBlob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: "audio/mpeg" });
+        const audioUrl = URL.createObjectURL(audioBlob);
         const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = url;
+        downloadLink.href = audioUrl;
         downloadLink.download = "speech.mp3";
         downloadLink.style.display = "block"; // Show the link
     };
 }
 
-// Initialize voices when the voice select changes
-document.getElementById("voice").addEventListener("change", initializeVoices);
+// ... (previous code)
 
 // Event listener for the speak button
 document.getElementById("speak").addEventListener("click", () => {
@@ -104,5 +98,6 @@ document.getElementById("speak").addEventListener("click", () => {
     // Generate and download the audio
     downloadAudio();
 });
+
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
