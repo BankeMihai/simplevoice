@@ -40,6 +40,24 @@ function speakText() {
     speechSynthesis.speak(utterance);
 }
 
+function initializeVoices() {
+    const voices = speechSynthesis.getVoices();
+    const voiceSelect = document.getElementById("voice");
+    voiceSelect.innerHTML = "";
+    voices.forEach((voice, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = voice.name;
+        voiceSelect.appendChild(option);
+    });
+}
+
+// Initialize voices when the page loads
+window.addEventListener("load", () => {
+    initializeVoices();
+});
+
+// Function to generate and download audio
 function downloadAudio() {
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
@@ -50,7 +68,7 @@ function downloadAudio() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.pitch = pitch;
     utterance.rate = rate;
-    utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
+    utterance.voice = speechSynthesis.getVoices()[selectedVoiceIndex];
 
     // Prevent the speech from playing
     utterance.volume = 0;
@@ -60,16 +78,31 @@ function downloadAudio() {
 
     // Wait for the audio to be ready
     utterance.onend = function () {
-        // Create an invisible anchor link for downloading
-        const downloadLink = document.createElement('a');
-        downloadLink.href = utterance.audioBuffer;
-        downloadLink.download = 'speech.mp3';
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        // Create a Blob directly from the audio data
+        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: "audio/mpeg" });
+
+        // Create a URL for the Blob
+        const url = URL.createObjectURL(blob);
+
+        // Set the download link's attributes and trigger the download
+        const downloadLink = document.getElementById("downloadLink");
+        downloadLink.href = url;
+        downloadLink.download = "speech.mp3";
+        downloadLink.style.display = "block"; // Show the link
     };
 }
 
+// Initialize voices when the voice select changes
+document.getElementById("voice").addEventListener("change", initializeVoices);
+
+// Event listener for the speak button
+document.getElementById("speak").addEventListener("click", () => {
+    // Ensure the download link is hidden
+    const downloadLink = document.getElementById("downloadLink");
+    downloadLink.style.display = "none";
+
+    // Generate and download the audio
+    downloadAudio();
+});
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
