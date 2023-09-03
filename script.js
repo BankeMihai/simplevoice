@@ -5,6 +5,7 @@ const downloadButton = document.getElementById("download");
 const pitchInput = document.getElementById("pitch");
 const rateInput = document.getElementById("rate");
 const audioElement = document.getElementById("audio");
+let audioChunks = [];
 
 // Define a list of available voices
 const availableVoices = [
@@ -53,25 +54,48 @@ function downloadAudio() {
     utterance.rate = rate;
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
 
-    // Synthesize the speech
+    // Create a media stream from the speech synthesis audio
+    const audioStream = new MediaStream();
+    const audioTrack = new MediaStreamTrack({ kind: "audio" });
+    audioStream.addTrack(audioTrack);
+
+    // Synthesize the speech and capture audio chunks
+    utterance.audioStream = audioStream;
     speechSynthesis.speak(utterance);
 
-    // Wait for the audio to be ready
-    utterance.onend = function () {
-        // Create a Blob directly from the audio data
-        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: 'audio/mpeg' });
+    // Create a MediaRecorder to capture audio data
+    const mediaRecorder = new MediaRecorder(audioStream);
 
-        // Create a URL for the Blob
-        const url = URL.createObjectURL(blob);
+    // When data is available, store it in audioChunks
+    mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+            audioChunks.push(event.data);
+        }
+    };
 
-        // Set the download link's attributes and trigger the download
+    // When recording stops, create a Blob and download it
+    mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
+        const url = URL.createObjectURL(audioBlob);
+
         const downloadLink = document.getElementById("downloadLink");
         downloadLink.href = url;
         downloadLink.download = "speech.mp3";
-        downloadLink.style.display = "none"; // Hide the link
-        downloadLink.click(); // Trigger the download
+        downloadLink.style.display = "none";
+        downloadLink.click();
+
+        // Clear audioChunks for future use
+        audioChunks = [];
+    };
+
+    // Start recording
+    mediaRecorder.start();
+
+    // Wait for the audio to finish
+    utterance.onend = () => {
+        // Stop recording
+        mediaRecorder.stop();
     };
 }
-
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
