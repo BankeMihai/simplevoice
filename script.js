@@ -39,7 +39,7 @@ function speakText() {
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
     speechSynthesis.speak(utterance);
 }
-// Modify the downloadAudio function
+
 function downloadAudio() {
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
@@ -52,20 +52,24 @@ function downloadAudio() {
     utterance.rate = rate;
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
 
-    // Synthesize the speech and create a Blob with the audio
-    const blob = new Blob([new SpeechSynthesisUtterance(text).audioData], {
-        type: 'audio/mpeg'
-    });
+    // Synthesize the speech
+    speechSynthesis.speak(utterance);
 
-    // Create a URL for the Blob
-    const url = URL.createObjectURL(blob);
+    // Wait for the audio to be ready
+    utterance.onend = function () {
+        // Create a Blob directly from the audio data
+        const blob = new Blob([utterance.audioData], { type: 'audio/mpeg' });
 
-    // Set the download link's attributes and trigger the download
-    const downloadLink = document.getElementById("downloadLink");
-    downloadLink.href = url;
-    downloadLink.download = "speech.mp3";
-    downloadLink.style.display = "none"; // Hide the link
-    downloadLink.click(); // Trigger the download
+        // Create a URL for the Blob
+        const url = URL.createObjectURL(blob);
+
+        // Set the download link's attributes and trigger the download
+        const downloadLink = document.getElementById("downloadLink");
+        downloadLink.href = url;
+        downloadLink.download = "speech.mp3";
+        downloadLink.style.display = "none"; // Hide the link
+        downloadLink.click(); // Trigger the download
+    };
 }
 
 
