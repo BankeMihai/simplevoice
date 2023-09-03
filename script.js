@@ -46,19 +46,36 @@ function downloadAudio() {
     const rate = parseFloat(document.getElementById("rate").value);
     const voiceSelect = document.getElementById("voice");
     const selectedVoiceIndex = voiceSelect.options[voiceSelect.selectedIndex].value;
-    
-    // Wait for the audio to be ready
-    utterance.onend = function () {
-        const blob = new Blob([new XMLSerializer().serializeToString(utterance)]);
-        const url = URL.createObjectURL(blob);
-        
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.pitch = pitch;
+    utterance.rate = rate;
+    utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
+
+    // Create an audio element
+    const audio = new Audio();
+    audio.src = URL.createObjectURL(new Blob([utterance.text], { type: 'audio/mpeg' }));
+
+    // Set the audio element to be autoplay (to prevent speech from playing)
+    audio.autoplay = false;
+
+    // Add a listener to wait for audio to load
+    audio.addEventListener('loadeddata', () => {
         // Set the download link's attributes and trigger the download
-        const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = url;
+        const downloadLink = document.createElement('a');
+        downloadLink.href = audio.src;
         downloadLink.download = "speech.mp3";
-        downloadLink.style.display = "none"; // Hide the link
-        downloadLink.click(); // Trigger the download
-    };
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        // Clean up the audio element and URL object
+        URL.revokeObjectURL(audio.src);
+    });
+
+    // Load the audio
+    audio.load();
 }
 
 
