@@ -39,33 +39,40 @@ function speakText() {
     utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
     speechSynthesis.speak(utterance);
 }
+// Function to generate and download audio
 function downloadAudio() {
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
     const rate = parseFloat(document.getElementById("rate").value);
     const voiceSelect = document.getElementById("voice");
     const selectedVoiceIndex = voiceSelect.options[voiceSelect.selectedIndex].value;
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.pitch = pitch;
     utterance.rate = rate;
-    utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
+    utterance.voice = speechSynthesis.getVoices()[selectedVoiceIndex];
+
+    // Prevent the speech from playing
+    utterance.volume = 0;
+
     // Synthesize the speech
     speechSynthesis.speak(utterance);
 
     // Wait for the audio to be ready
     utterance.onend = function () {
         // Create a Blob directly from the audio data
-        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: 'audio/wav' });
+        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: "audio/mpeg" });
 
         // Create a URL for the Blob
-        const url = URL.createObjectURL(blob);
+        const audioUrl = URL.createObjectURL(blob);
+
         // Set the download link's attributes and trigger the download
         const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = url;
-        downloadLink.download = "TextToSpeech";
-        downloadLink.style.display = "none"; // Hide the link
-        downloadLink.click(); // Trigger the download
+        downloadLink.href = audioUrl;
+        downloadLink.download = "speech.mp3";
+        downloadLink.style.display = "block"; // Show the link
     };
 }
+
 speakButton.addEventListener("click", speakText);
 downloadButton.addEventListener("click", downloadAudio);
