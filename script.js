@@ -40,6 +40,7 @@ function speakText() {
     speechSynthesis.speak(utterance);
 }
 // Function to generate and download audio
+// Function to generate and download audio
 function downloadAudio() {
     const text = document.getElementById("text").value;
     const pitch = parseFloat(document.getElementById("pitch").value);
@@ -58,20 +59,54 @@ function downloadAudio() {
     // Synthesize the speech
     speechSynthesis.speak(utterance);
 
+    // Create a new AudioContext to access the audio data
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
     // Wait for the audio to be ready
-    utterance.onend = function () {
-        // Create a Blob directly from the audio data
-        const blob = new Blob([new Uint8Array(utterance.audioBuffer)], { type: "audio/mpeg" });
+    utterance.onend = async function () {
+        const audioBuffer = audioContext.createBufferSource();
+        audioBuffer.buffer = audioContext.createBuffer(1, utterance.audioBuffer.length, audioContext.sampleRate);
+        audioBuffer.buffer.getChannelData(0).set(utterance.audioBuffer);
 
-        // Create a URL for the Blob
-        const audioUrl = URL.createObjectURL(blob);
+        // Create a Blob from the audioBuffer
+        try {
+            const blob = await audioBufferToBlob(audioBuffer.buffer);
+            const audioUrl = URL.createObjectURL(blob);
 
-        // Set the download link's attributes and trigger the download
-        const downloadLink = document.getElementById("downloadLink");
-        downloadLink.href = audioUrl;
-        downloadLink.download = "speech.mp3";
-        downloadLink.style.display = "block"; // Show the link
+            // Set the download link's attributes and trigger the download
+            const downloadLink = document.getElementById("downloadLink");
+            downloadLink.href = audioUrl;
+            downloadLink.download = "speech.mp3";
+            downloadLink.style.display = "block"; // Show the link
+        } catch (error) {
+            console.error("Error creating Blob:", error);
+        }
     };
+}
+
+// Function to convert an AudioBuffer to a Blob
+function audioBufferToBlob(buffer) {
+    return new Promise((resolve, reject) => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const destination = audioContext.createMediaStreamDestination();
+        const recorder = new MediaRecorder(destination.stream);
+
+        recorder.ondataavailable = (e) => {
+            resolve(e.data);
+            audioContext.close();
+        };
+
+        recorder.onstop = () => {
+            audioContext.close();
+        };
+
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(destination);
+        source.start();
+        recorder.start();
+        recorder.stop();
+    });
 }
 
 speakButton.addEventListener("click", speakText);
