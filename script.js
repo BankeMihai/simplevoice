@@ -48,6 +48,7 @@ function generateAudio() {
             const audio = document.getElementById('audio');
             audio.src = audioUrl;
             audio.style.display = 'block'; // Show the audio player
+            audio.play(); // Play the generated audio
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -56,19 +57,7 @@ function generateAudio() {
 
 // Event listener for the speak button
 document.getElementById('speak').addEventListener('click', () => {
-    // Generate the audio and set the audio source
+    // Generate the audio and play it
     generateAudio();
-});
-
-// Function to play the audio
-function playAudio() {
-    const audio = document.getElementById('audio');
-    audio.play();
-}
-
-// Event listener for the play button
-document.getElementById('audio').addEventListener('play', () => {
-    // Play the generated audio when the play button is clicked
-    playAudio();
 });
 
