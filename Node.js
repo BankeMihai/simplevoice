@@ -1,25 +1,24 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const gtts = require("node-gtts");
-const fs = require("fs");
+const express = require('express');
+const bodyParser = require('body-parser');
+const { TextToSpeech } = require('your-text-to-speech-library'); // Replace with an actual TTS library
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 app.use(bodyParser.json());
 
-app.post("/tts", (req, res) => {
+app.post('/synthesize', (req, res) => {
     const text = req.body.text;
-    const pitch = req.body.pitch || 1;
-    const rate = req.body.rate || 1;
-    const gttsStream = gtts(text, "en");
-    gttsStream.pipe(res);
 
-    // Optionally, you can save the speech to a file
-    const outputFile = "output.mp3";
-    gtts(text, "en", pitch, rate).save(outputFile, () => {
-        console.log(`Speech saved to ${outputFile}`);
-    });
+    // Use your Text to Speech library to generate an audio file
+    const audioBuffer = TextToSpeech.synthesize(text);
+
+    // Set the response headers for an audio file
+    res.setHeader('Content-Type', 'audio/wav');
+    res.setHeader('Content-Disposition', 'attachment; filename="speech.wav"');
+
+    // Send the audio buffer as a response
+    res.send(audioBuffer);
 });
 
 app.listen(port, () => {
