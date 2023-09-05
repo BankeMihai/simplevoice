@@ -25,7 +25,8 @@ function populateVoiceDropdown() {
     });
 }
 
-function playAudio() {
+// Function to generate and play audio
+function generateAudio() {
     const text = document.getElementById('text').value;
     const pitch = parseFloat(document.getElementById('pitch').value);
     const rate = parseFloat(document.getElementById('rate').value);
@@ -40,14 +41,13 @@ function playAudio() {
         body: JSON.stringify({ text, pitch, rate }),
     };
 
-    fetch('/tts', requestOptions)
+    return fetch('/tts', requestOptions)
         .then((response) => response.json())
         .then((data) => {
             const audioUrl = data.audioUrl;
             const audio = document.getElementById('audio');
             audio.src = audioUrl;
             audio.style.display = 'block'; // Show the audio player
-            audio.play(); // Play the audio
         })
         .catch((error) => {
             console.error('Error:', error);
@@ -56,8 +56,19 @@ function playAudio() {
 
 // Event listener for the speak button
 document.getElementById('speak').addEventListener('click', () => {
-    // Generate and play the audio
+    // Generate the audio and set the audio source
+    generateAudio();
+});
+
+// Function to play the audio
+function playAudio() {
+    const audio = document.getElementById('audio');
+    audio.play();
+}
+
+// Event listener for the play button
+document.getElementById('audio').addEventListener('play', () => {
+    // Play the generated audio when the play button is clicked
     playAudio();
 });
-speakButton.addEventListener("click", playAudio);
 
