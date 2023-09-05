@@ -25,55 +25,39 @@ function populateVoiceDropdown() {
     });
 }
 
-// Function to speak the entered text using the selected voice
-function speakText() {
-    const text = document.getElementById("text").value;
-    const pitch = parseFloat(document.getElementById("pitch").value);
-    const rate = parseFloat(document.getElementById("rate").value);
-    const voiceSelect = document.getElementById("voice");
+function playAudio() {
+    const text = document.getElementById('text').value;
+    const pitch = parseFloat(document.getElementById('pitch').value);
+    const rate = parseFloat(document.getElementById('rate').value);
+    const voiceSelect = document.getElementById('voice');
     const selectedVoiceIndex = voiceSelect.options[voiceSelect.selectedIndex].value;
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.pitch = pitch;
-    utterance.rate = rate;
-    utterance.voice = window.speechSynthesis.getVoices()[selectedVoiceIndex];
-    speechSynthesis.speak(utterance);
+    const requestOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text, pitch, rate }),
+    };
+
+    fetch('/tts', requestOptions)
+        .then((response) => response.json())
+        .then((data) => {
+            const audioUrl = data.audioUrl;
+            const audio = document.getElementById('audio');
+            audio.src = audioUrl;
+            audio.style.display = 'block'; // Show the audio player
+            audio.play(); // Play the audio
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 }
 
-// Event listener for the download button
-downloadButton.addEventListener("click", async () => {
-    const text = textInput.value;
-    const pitch = parseFloat(document.getElementById("pitch").value);
-    const rate = parseFloat(document.getElementById("rate").value);
-
-    try {
-        const response = await fetch("/tts", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ text, pitch, rate }),
-        });
-
-        if (response.ok) {
-            const blob = await response.blob();
-
-            // Create a URL for the Blob
-            const audioUrl = URL.createObjectURL(blob);
-
-            // Set the download link's attributes and trigger the download
-            const downloadLink = document.getElementById("downloadLink");
-            downloadLink.href = audioUrl;
-            downloadLink.download = "speech.mp3";
-            downloadLink.style.display = "block"; // Show the link
-        } else {
-            console.error("Failed to generate audio:", response.status, response.statusText);
-        }
-    } catch (error) {
-        console.error("Error generating audio:", error);
-    }
+// Event listener for the speak button
+document.getElementById('speak').addEventListener('click', () => {
+    // Generate and play the audio
+    playAudio();
 });
-
-
-speakButton.addEventListener("click", speakText);
+speakButton.addEventListener("click", playAudio);
 
